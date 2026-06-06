@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Paris Story Map • 巴黎叙事地图</title>
+    <meta name="description" content="滚动浏览巴黎及周边旅行故事，地图作为背景实时跟随，文字自动避让">
+    
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&amp;family=Inter:wght@400;500;600&amp;display=swap');
+
+        :root {
+            --accent: #c0392b;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background: #111;
+            color: #333;
+            line-height: 1.7;
+            overflow-x: hidden;
+        }
+
+        /* 全屏地图背景 */
+        #map {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            z-index: 1;
+            filter: saturate(0.92) contrast(1.08);
+        }
+
+        /* 渐变遮罩 */
+        .map-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            background: linear-gradient(
+                to bottom,
+                rgba(17,17,17,0.32) 0%,
+                rgba(17,17,17,0.12) 32%,
+                rgba(17,17,17,0.12) 68%,
+                rgba(17,17,17,0.42) 100%
+            );
+            z-index: 2;
+            pointer-events: none;
+        }
+
+        .story-container {
+            position: relative;
+            z-index: 10;
+            max-width: 880px;
+            margin: 0 auto;
+            padding: 80px 24px 160px;
+        }
+
+        .header {
+            text-align: center;
+            padding: 70px 20px 100px;
+            color: white;
+            text-shadow: 0 4px 30px rgba(0,0,0,0.7);
+        }
+
+        .header h1 {
+            font-family: 'Playfair Display', Georgia, serif;
+            font-size: 4rem;
+            margin: 0 0 18px;
+            color: white;
+            letter-spacing: -3px;
+        }
+
+        .header .subtitle {
+            font-size: 1.35rem;
+            opacity: 0.9;
+        }
+
+        /* 文字卡片 - 智能左右对齐 + 避让（更大幅度） */
+        .section {
+            background: rgba(255, 255, 255, 0.97);
+            margin-bottom: 135px;
+            padding: 46px 52px;
+            border-radius: 24px;
+            box-shadow: 0 22px 65px rgba(0, 0, 0, 0.3);
+            scroll-margin-top: 150px;
+            max-width: 620px;
+            transition: margin-left 0.5s cubic-bezier(0.4, 0, 0.2, 1), 
+                        margin-right 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+                        box-shadow 0.3s ease;
+        }
+
+        .section.align-left {
+            margin-right: auto;
+            margin-left: 160px;
+        }
+
+        .section.align-right {
+            margin-left: auto;
+            margin-right: 160px;
+        }
+
+        .section h2 {
+            font-family: 'Playfair Display', Georgia, serif;
+            font-size: 2.2rem;
+            margin: 0 0 20px;
+            color: #222;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            flex-wrap: wrap;
+        }
+
+        .section h2 .day {
+            background: #c0392b;
+            color: white;
+            font-size: 0.82rem;
+            font-weight: 700;
+            padding: 6px 15px;
+            border-radius: 9999px;
+            letter-spacing: 0.8px;
+            white-space: nowrap;
+        }
+
+        .section p {
+            font-size: 1.12rem;
+            margin: 18px 0;
+            color: #444;
+        }
+
+        .section .intro {
+            font-style: italic;
+            color: #666;
+            font-size: 1.28rem;
+            border-left: 5px solid #c0392b;
+            padding-left: 26px;
+            margin: 30px 0;
+        }
+
+        .fact {
+            color: #c0392b;
+            font-weight: 600;
+            cursor: pointer;
+            border-bottom: 1px dotted #c0392b;
+            transition: color 0.2s;
+        }
+
+        .fact:hover {
+            color: #922b21;
+        }
+
+        blockquote {
+            font-family: 'Playfair Display', Georgia, serif;
+            font-size: 1.6rem;
+            color: #555;
+            border-left: 6px solid #f0e9df;
+            padding-left: 30px;
+            margin: 38px 0;
+            font-style: italic;
+        }
+
+        .progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 4px;
+            background: linear-gradient(to right, #c0392b, #922b21);
+            z-index: 999;
+            transition: width 0.1s ease;
+        }
+
+        #popup {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.75);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .popup-content {
+            background: white;
+            width: 92%;
+            max-width: 540px;
+            border-radius: 24px;
+            padding: 40px;
+            box-shadow: 0 30px 80px rgba(0,0,0,0.45);
+        }
+
+        .popup-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 24px;
+        }
+
+        .popup-header h3 {
+            margin: 0;
+            font-size: 1.65rem;
+        }
+
+        .close-btn {
+            font-size: 36px;
+            cursor: pointer;
+            color: #aaa;
+            line-height: 1;
+        }
+
+        .close-btn:hover {
+            color: #333;
+        }
+
+        .day-trip {
+            background: #fff0e8;
+            color: #c0392b;
+            padding: 4px 12px;
+            border-radius: 7px;
+            font-size: 0.82rem;
+            font-weight: 600;
+        }
+
+        @media (max-width: 768px) {
+            .story-container {
+                padding: 40px 16px 110px;
+            }
+            .section {
+                padding: 36px 28px;
+                margin-bottom: 100px;
+                max-width: 100% !important;
+                margin-left: 0 !important;
+                margin-right: 0 !important;
+            }
+            .header h1 {
+                font-size: 3rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 全屏地图背景 -->
+    <div id="map"></div>
+    <div class="map-overlay"></div>
+
+    <!-- 进度条 -->
+    <div class="progress-bar" id="progress-bar"></div>
+
+    <!-- 故事内容 -->
+    <div class="story-container">
+        <div class="header">
+            <h1>Paris &amp; Surroundings</h1>
+            <p class="subtitle">一次关于巴黎及周边的沉浸式旅行故事</p>
+            <p style="margin-top: 24px; opacity: 0.9; font-size: 1.1rem;">
+                向下滚动，文字会自动避让地图上的点，地图也会相应位移
+            </p>
+        </div>
+
+        <!-- Day 1-2 -->
+        <section class="section" data-city="0">
+            <h2><span class="day">DAY 1-2</span> 埃菲尔铁塔与卢浮宫</h2>
+            <p class="intro">巴黎最经典的开场</p>
+            <p>清晨抵达，下午直奔埃菲尔铁塔。战神广场野餐，看着铁塔在夕阳中亮起金光。第二天深入卢浮宫，慢慢欣赏《蒙娜丽莎》和拿破仑公寓。</p>
+        </section>
+
+        <!-- Day 3-4 -->
+        <section class="section" data-city="1">
+            <h2><span class="day">DAY 3-4</span> 圣母院与蒙马特</h2>
+            <p>沿着塞纳河走到圣母院，在拉丁区老书店里消磨半天。爬上蒙马特高地，圣心堂的白色圆顶在阳光下格外耀眼。</p>
+            <p class="fact" data-fact="0">Fun-fact：我在蒙马特被一位“艺术家”热情搭讪，后来才发现他想卖画给我。</p>
+        </section>
+
+        <!-- Day 5-7 -->
+        <section class="section" data-city="2">
+            <h2><span class="day">DAY 5-7</span> 玛莱区与塞纳河夜游</h2>
+            <p>玛莱区鹅卵石小巷、蓬皮杜中心、犹太美食，最后一晚租船夜游塞纳河，两岸灯火与埃菲尔铁塔的闪光美得像梦。</p>
+        </section>
+
+        <!-- Day 8: 凡尔赛 -->
+        <section class="section" data-city="3">
+            <h2><span class="day">DAY 8</span> 凡尔赛宫 <span class="day-trip">一日游</span></h2>
+            <p class="intro">巴黎最经典的周边城堡</p>
+            <p>乘坐RER前往凡尔赛。镜厅的金碧辉煌让人震撼，大花园走了一整天才勉强逛完。在凡尔赛吃了正宗的柠檬塔和马卡龙。</p>
+        </section>
+
+        <!-- Day 9: 吉维尼 -->
+        <section class="section" data-city="4">
+            <h2><span class="day">DAY 9</span> 吉维尼 <span class="day-trip">莫奈花园</span></h2>
+            <p class="intro">印象派爱好者的圣地</p>
+            <p>从巴黎圣拉扎尔站坐火车约1小时到达吉维尼。莫奈故居和睡莲池塘美得像画里一样，粉紫绿色的花海让人流连忘返。</p>
+            <p class="fact" data-fact="1">Fun-fact：我在吉维尼的日本桥上拍了上百张照片，最后发现相机没插内存卡……</p>
+        </section>
+
+        <!-- Day 10: 枫丹白露 -->
+        <section class="section" data-city="5">
+            <h2><span class="day">DAY 10</span> 枫丹白露 <span class="day-trip">城堡与森林</span></h2>
+            <p class="intro">比凡尔赛更安静的选择</p>
+            <p>枫丹白露城堡比凡尔赛更低调但同样华丽。下午在森林里散步，空气清新，是巴黎人周末最爱的休闲地。</p>
+        </section>
+
+        <!-- 结尾 -->
+        <section class="section" data-city="6">
+            <h2><span class="day">尾声</span> 告别巴黎</h2>
+            <p>这次旅行让我真正爱上了巴黎——不仅仅是铁塔和卢浮宫，还有那些安静的周边小镇和森林。</p>
+            
+            <blockquote>
+                “巴黎不只是一座城市，它是一种生活方式。”<br>
+                <span style="font-size:0.9rem; color:#888;">—— 旅途中偶遇的法国作家</span>
+            </blockquote>
+            
+            <p style="text-align:center; margin-top:45px; font-size:1.25rem; color:#555;">
+                谢谢你陪我走完这段旅程。<br>
+                <strong>下次再见，巴黎。</strong>
+            </p>
+        </section>
+    </div>
+
+    <!-- 弹窗 -->
+    <div id="popup">
+        <div class="popup-content">
+            <div class="popup-header">
+                <h3 id="popup-title"></h3>
+                <span class="close-btn" onclick="closePopup()">&times;</span>
+            </div>
+            <div id="popup-body"></div>
+        </div>
+    </div>
+
+    <script>
+        // ==================== 全屏地图 ====================
+        const map = L.map('map', {
+            zoomControl: false,
+            attributionControl: false,
+            preferCanvas: true,
+            dragging: false,
+            scrollWheelZoom: false,
+            doubleClickZoom: false,
+            boxZoom: false,
+            keyboard: false,
+            tap: false
+        }).setView([48.7, 2.3], 9);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            className: 'map-tiles'
+        }).addTo(map);
+
+        // 路线点（含不同缩放级别，显示周边环境）
+        const routePoints = [
+            { name: "埃菲尔铁塔", lat: 48.8584, lng: 2.2945, zoom: 14 },   // 市区细节
+            { name: "卢浮宫", lat: 48.8606, lng: 2.3376, zoom: 14 },       // 市区细节
+            { name: "圣母院", lat: 48.8529, lng: 2.3500, zoom: 14 },       // 市区细节
+            { name: "蒙马特", lat: 48.8867, lng: 2.3431, zoom: 13 },       // 稍远视角
+            { name: "玛莱区", lat: 48.8570, lng: 2.3610, zoom: 14 },       // 市区细节
+            { name: "凡尔赛宫", lat: 48.8044, lng: 2.1232, zoom: 12 },     // 显示城堡+花园
+            { name: "吉维尼", lat: 49.0755, lng: 1.5339, zoom: 13 },       // 显示花园环境
+            { name: "枫丹白露", lat: 48.4020, lng: 2.7010, zoom: 11 }      // 显示城堡+大片森林
+        ];
+
+        // 完整路线
+        const fullRoute = L.polyline(routePoints.map(p => [p.lat, p.lng]), {
+            color: '#e8d9c9',
+            weight: 4,
+            opacity: 0.6
+        }).addTo(map);
+
+        let traveledRoute = L.polyline([], {
+            color: '#c0392b',
+            weight: 6,
+            opacity: 0.95
+        }).addTo(map);
+
+        // ==================== 智能文字对齐 + 地图位移逻辑 ====================
+        function getAlignment(point) {
+            // 经度越小（偏西）→ 文字靠右；经度越大（偏东）→ 文字靠左
+            return point.lng < 2.35 ? 'align-right' : 'align-left';
+        }
+
+        function applyAlignment(section, alignment) {
+            section.classList.remove('align-left', 'align-right');
+            section.classList.add(alignment);
+        }
+
+        function updateMapWithSmartOffset(index) {
+            if (index < 0 || index >= routePoints.length) return;
+
+            const point = routePoints[index];
+            const section = document.querySelector(`.section[data-city="${index}"]`);
+            const alignment = getAlignment(point);
+
+            // 1. 应用文字左右对齐（躲开地图上的点）
+            if (section) {
+                applyAlignment(section, alignment);
+            }
+
+            // 2. 计算地图偏移，让标记躲开文字区域
+            let targetLng = point.lng;
+            const offset = 0.18;
+
+            if (alignment === 'align-right') {
+                // 文字在右 → 地图向左偏移，标记留在左侧
+                targetLng = point.lng - offset;
+            } else {
+                // 文字在左 → 地图向右偏移，标记留在右侧
+                targetLng = point.lng + offset;
+            }
+
+            // 3. 更新地图视角（带智能位移 + 不同缩放显示周边环境）
+            const targetZoom = point.zoom || 12;
+            map.setView([point.lat, targetLng], targetZoom, {
+                animate: true,
+                duration: 0.95,
+                easeLinearity: 0.35
+            });
+
+            // 4. 更新已走路线
+            const coords = routePoints.slice(0, index + 1).map(p => [p.lat, p.lng]);
+            traveledRoute.setLatLngs(coords);
+        }
+
+        // ==================== 滚动同步 ====================
+        const sections = document.querySelectorAll('.section');
+        const progressBar = document.getElementById('progress-bar');
+        let currentIndex = -1;
+        let updateTimeout = null;
+
+        function debouncedSmartUpdate(index) {
+            if (updateTimeout) clearTimeout(updateTimeout);
+            updateTimeout = setTimeout(() => {
+                if (index !== currentIndex) {
+                    updateMapWithSmartOffset(index);
+                    currentIndex = index;
+                }
+            }, 100);
+        }
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const idx = parseInt(entry.target.dataset.city);
+                    debouncedSmartUpdate(idx);
+                }
+            });
+        }, {
+            threshold: 0.5,
+            rootMargin: "-140px 0px -20% 0px"
+        });
+
+        sections.forEach(section => observer.observe(section));
+
+        // 进度条
+        function updateProgress() {
+            const scrollTop = window.scrollY;
+            const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+            const progress = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+            progressBar.style.width = `${Math.min(progress, 100)}%`;
+        }
+
+        window.addEventListener('scroll', updateProgress);
+
+        // ==================== Fun-fact 弹窗 ====================
+        const facts = {
+            0: {
+                title: "蒙马特“艺术家”",
+                content: "一个自称是艺术家的男人热情地和我聊天，结果发现他只是想卖我一幅画……后来我还是买了一张小水彩，留作纪念。"
+            },
+            1: {
+                title: "吉维尼相机灾难",
+                content: "我在吉维尼的日本桥上拍了上百张照片，最后发现相机没插内存卡……只能靠脑子记住那些美丽的睡莲。"
+            }
+        };
+
+        function showFact(id) {
+            const fact = facts[id];
+            if (!fact) return;
+            document.getElementById('popup-title').innerHTML = fact.title;
+            document.getElementById('popup-body').innerHTML = `<p style="font-size:1.1rem; line-height:1.85;">${fact.content}</p>`;
+            document.getElementById('popup').style.display = 'flex';
+        }
+
+        function closePopup() {
+            document.getElementById('popup').style.display = 'none';
+        }
+
+        document.addEventListener('click', e => {
+            if (e.target.classList.contains('fact')) {
+                showFact(e.target.dataset.fact);
+            }
+        });
+
+        document.getElementById('popup').addEventListener('click', e => {
+            if (e.target.id === 'popup') closePopup();
+        });
+
+        // ==================== 初始化 ====================
+        function init() {
+            setTimeout(() => {
+                // 初始定位到埃菲尔铁塔（偏西 → 文字靠右 + 地图向左偏移）
+                const firstPoint = routePoints[0];
+                const targetLng = firstPoint.lng - 0.18;
+                
+                map.setView([firstPoint.lat, targetLng], 11, { animate: true, duration: 1.6 });
+                traveledRoute.setLatLngs([[firstPoint.lat, firstPoint.lng]]);
+
+                // 第一个 section 靠右
+                const firstSection = document.querySelector('.section[data-city="0"]');
+                if (firstSection) {
+                    firstSection.classList.add('align-right');
+                }
+            }, 700);
+
+            updateProgress();
+
+            document.addEventListener('keydown', e => {
+                if (e.key === 'Escape') closePopup();
+            });
+
+            console.log('%c[智能避让 + 地图位移版] 巴黎叙事地图已加载', 'color:#c0392b');
+        }
+
+        window.onload = init;
+    </script>
+</body>
+</html>
