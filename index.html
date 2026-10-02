@@ -866,6 +866,37 @@
       });
     }
 
+    async function toggleFullscreen() {
+      const fullscreenElement = document.fullscreenElement || document.webkitFullscreenElement;
+      try {
+        if (fullscreenElement) {
+          if (document.exitFullscreen) {
+            await document.exitFullscreen();
+          } else if (document.webkitExitFullscreen) {
+            await document.webkitExitFullscreen();
+          }
+          return;
+        }
+
+        const root = document.documentElement;
+        if (root.requestFullscreen) {
+          await root.requestFullscreen();
+        } else if (root.webkitRequestFullscreen) {
+          await root.webkitRequestFullscreen();
+        }
+      } catch (_) {
+        // Fullscreen can be denied by the browser or platform; leave the page unchanged.
+      }
+    }
+
+    document.addEventListener("dblclick", (event) => {
+      const target = event.target;
+      if (target instanceof Element && target.closest("button, a, input, [role=\"button\"]")) {
+        return;
+      }
+      toggleFullscreen();
+    });
+
     function updateProgress() {
       const max = document.documentElement.scrollHeight - window.innerHeight;
       const pct = max > 0 ? (window.scrollY / max) * 100 : 0;
