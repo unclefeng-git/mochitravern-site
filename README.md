@@ -4,60 +4,34 @@
 
 ## 内容
 
-单页滚动叙事，背景图随地区切换。气候经线自南向北，兼收奇境：
+单页滚动叙事。背景为 **13 段固定长镜头短片**（约 15s H.264，muted 缓慢循环，`playbackRate ≈ 0.8`），随地区切换；环境音按场景合成并 loudnorm 至约 −16 LUFS，可开关。
 
-1. **暖潮珊瑚湾** — 热带海岸
-2. **星环环礁** — 珊瑚环礁 / 潟湖
-3. **红树潮汐湾** — 河口红树林
-4. **荧潮夜岸** — 生物荧光海岸
-5. **啼雨翡翠林** — 热带雨林
-6. **雾吞裂谷** — 迷雾峡谷
-7. **金穗风原** — 草原麦田
-8. **镜盐白泽** — 盐湖镜面
-9. **黑曜熔漠** — 火山玻璃荒漠
-10. **断云脊脉** — 高山云海
-11. **浮梦群屿** — 浮空群岛
-12. **晶泪洞府** — 水晶洞窟
-13. **极光冻原** — 苔原 · 极光
-14. **永夜冰原** — 极境冰原
+| # | 地区 | 源片关键词 | 环境音 |
+|---|------|-----------|--------|
+| 00 | 巴陶暖岸 | seaside_batrau | seaside_dusk |
+| 01 | 彼岸棕影 | sea_other_side | ocean/waves/palms dusk |
+| 02 | 风车汀泽 | riverside | wind_farm + water |
+| 03 | 古木密林 | arbre | forest_dawn |
+| 04 | 金穗废墟 | champ | wheat_dusk |
+| 05 | 拱脊暗山 | montain | mountain_stream |
+| 06 | 卧佛森域 | buddha | temple_night |
+| 07 | 残响圣堂 | cathédrale | temple_garden |
+| 08 | 极光听台 | rada | snow/wind/cosmos |
+| 09 | 沙洲巨树 | sable | wind/leaves |
+| 10 | 迷途雪墟 | lost | winter_woods |
+| 11 | 极光雪原 | snow | snow_day |
+| 12 | 纯白冰岸 | iceside | blizzard |
 
-已替换原巴黎叙事地图内容；由七境扩充为十四境。
+源片取自 `videos100mins/*.ogv` 中段稳定镜头（约 t=2992s，15s）。
 
 ## 技术
 
 - 纯静态 `index.html`（内联 CSS/JS）
-- 图片热链 Unsplash CDN（`images.unsplash.com`），页脚与下文署名
-- 右侧导航点随滚动高亮；顶栏进度条；卡片入场动画
+- `media/region-XX.mp4` + `media/region-XX.jpg`（poster）
+- `audio/region-XX.mp3`（Soundscape Mixer / R8000_22_ACEStep_CIRCONS）
+- 右侧导航点随滚动高亮；顶栏进度条；卡片入场；视频与 BGM 邻近预加载
 - 可置于任意静态托管 / Cloudflare 反代之前
 
-## 图片署名（Unsplash License）
+## 许可与署名
 
-| 地区 | 照片 | 作者页 |
-|------|------|--------|
-| 暖潮珊瑚湾 | photo-1507525428034-b723cf961d3e | [Sean Oulashin](https://unsplash.com/photos/1507525428034-b723cf961d3e) |
-| 星环环礁 | photo-1559827260-dc66d52bef19 | [Unsplash](https://unsplash.com/photos/1559827260-dc66d52bef19) |
-| 红树潮汐湾 | photo-1518509562904-e7ef99cdcc86 | [Unsplash](https://unsplash.com/photos/1518509562904-e7ef99cdcc86) |
-| 荧潮夜岸 | photo-1505118380757-91f5f5632de0 | [Silas Baisch](https://unsplash.com/photos/1505118380757-91f5f5632de0) |
-| 啼雨翡翠林 | photo-1448375240586-882707db888b | [Sebastian Unrau](https://unsplash.com/photos/1448375240586-882707db888b) |
-| 雾吞裂谷 | photo-1470071459604-3b5ec3a7fe05 | [Unsplash](https://unsplash.com/photos/1470071459604-3b5ec3a7fe05) |
-| 金穗风原 | photo-1500382017468-9049fed747ef | [Henrique Felix](https://unsplash.com/photos/1500382017468-9049fed747ef) |
-| 镜盐白泽 | photo-1605649487212-47bdab064df7 | [Unsplash](https://unsplash.com/photos/1605649487212-47bdab064df7) |
-| 黑曜熔漠 | photo-1611273426858-450d8e3c9fce | [Unsplash](https://unsplash.com/photos/1611273426858-450d8e3c9fce) |
-| 断云脊脉 | photo-1464822759023-fed622ff2c3b | [Kalen Emsley](https://unsplash.com/photos/1464822759023-fed622ff2c3b) |
-| 浮梦群屿 | photo-1506905925346-21bda4d32df4 | [Samuel Ferrara](https://unsplash.com/photos/1506905925346-21bda4d32df4) |
-| 晶泪洞府 | photo-1547036967-23d11aacaee0 | [Unsplash](https://unsplash.com/photos/1547036967-23d11aacaee0) |
-| 极光冻原 | photo-1531366936337-7c912a4589a7 | [Jonatan Pie](https://unsplash.com/photos/1531366936337-7c912a4589a7) |
-| 永夜冰原 | photo-1491002052546-bf38f186af56 | [Adam Chang](https://unsplash.com/photos/1491002052546-bf38f186af56) |
-
-许可：https://unsplash.com/license
-
-## 本地预览
-
-```bash
-python3 -m http.server 8080 --directory .
-# 打开 http://localhost:8080
-```
-
-## 环境音
-
-十四境各有一段约 5 分钟的 MP3 循环（`audio/region-XX.mp3`，128 kbps），由 Soundscape Mixer 渲染。页面左下角按钮开启后，滚动切换地区时会交叉淡入对应循环；仅预加载当前±1 以控制内存。详见 `audio/README.md`。
+影像与环境音为摩奇酒馆自制素材；Soundscape 采样许可见生成工具 `CREDITS.md`（CC0 / Mixkit）。
