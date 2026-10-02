@@ -57,3 +57,7 @@
 python3 -m http.server 8080 --directory .
 # 打开 http://localhost:8080
 ```
+
+## 环境音
+
+十四境各有一段约 5 分钟的 MP3 循环（`audio/region-XX.mp3`，128 kbps），由 Soundscape Mixer 渲染。页面左下角按钮开启后，滚动切换地区时会交叉淡入对应循环；仅预加载当前±1 以控制内存。详见 `audio/README.md`。

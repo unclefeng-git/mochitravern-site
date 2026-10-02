@@ -294,6 +294,33 @@
       footer ul { columns: 2; column-gap: 24px; }
     }
 
+
+    .audio-toggle {
+      position: fixed;
+      left: 18px;
+      bottom: 18px;
+      z-index: 40;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 14px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.18);
+      background: rgba(12,16,22,0.78);
+      color: var(--ink);
+      font: 500 0.82rem/1 "Noto Sans SC", system-ui, sans-serif;
+      backdrop-filter: blur(10px);
+      cursor: pointer;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.28);
+    }
+    .audio-toggle:hover { border-color: rgba(125,211,192,0.55); }
+    .audio-toggle .icon { width: 1.1em; text-align: center; opacity: 0.9; }
+    .audio-toggle[aria-pressed="true"] .label::after { content: "开"; }
+    .audio-toggle[aria-pressed="false"] .label::after { content: "关"; }
+    @media (max-width: 860px) {
+      .audio-toggle { left: 12px; bottom: 12px; padding: 9px 12px; }
+    }
+
     @media (max-width: 860px) {
       .story { margin: 0 auto; padding: 0 18px 100px; }
       .rail { right: 8px; gap: 7px; }
@@ -307,6 +334,12 @@
 </head>
 <body>
   <div class="progress" id="progress"></div>
+
+  <button type="button" class="audio-toggle" id="audioToggle" aria-pressed="false" title="环境音（点击开启）">
+    <span class="icon" aria-hidden="true">♪</span>
+    <span>环境音 · <span class="label"></span></span>
+  </button>
+
 
   <div class="bg-stack" aria-hidden="true">
     <div class="bg-layer active" data-bg="0" style="background-image:url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1800&q=80')"></div>
@@ -593,6 +626,7 @@
       <li>永夜冰原 — <a href="https://unsplash.com/photos/1491002052546-bf38f186af56" target="_blank" rel="noopener">Adam Chang</a></li>
     </ul>
     <p style="margin-top:12px;">许可：<a href="https://unsplash.com/license" target="_blank" rel="noopener">Unsplash License</a> · 仓库：unclefeng-git/mochitravern-site</p>
+    <p style="margin-top:8px;">环境音由 Soundscape Mixer（R8000_22_ACEStep_CIRCONS）生成，循环约 5 分钟；浏览器需用户手势后才会开始播放。</p>
   </footer>
 
   <script>
@@ -601,12 +635,126 @@
     const navLinks = [...document.querySelectorAll(".rail a")];
     const regions = [...document.querySelectorAll("[data-region]")];
     const regionSections = [...document.querySelectorAll(".region")];
+    const audioToggle = document.getElementById("audioToggle");
     let current = 0;
+
+    const REGION_COUNT = 14;
+    const TARGET_VOL = 0.28;
+    const FADE_MS = 900;
+    const audioCache = new Map(); // idx -> HTMLAudioElement
+    let activeIdx = -1;
+    let audioEnabled = false;
+    let fadeToken = 0;
+
+    function audioUrl(idx) {
+      return `audio/region-${String(idx).padStart(2, "0")}.mp3`;
+    }
+
+    function getAudio(idx) {
+      if (idx < 0 || idx >= REGION_COUNT) return null;
+      let el = audioCache.get(idx);
+      if (!el) {
+        el = new Audio(audioUrl(idx));
+        el.loop = true;
+        el.preload = "none";
+        el.volume = 0;
+        audioCache.set(idx, el);
+      }
+      return el;
+    }
+
+    function preloadAround(idx) {
+      [idx - 1, idx, idx + 1].forEach((i) => {
+        const el = getAudio(i);
+        if (!el) return;
+        if (el.preload !== "auto") {
+          el.preload = "auto";
+          try { el.load(); } catch (_) {}
+        }
+      });
+      // Drop far caches to limit memory
+      [...audioCache.keys()].forEach((i) => {
+        if (Math.abs(i - idx) > 1) {
+          const el = audioCache.get(i);
+          if (el && i !== activeIdx) {
+            el.pause();
+            el.removeAttribute("src");
+            el.load();
+            audioCache.delete(i);
+          }
+        }
+      });
+    }
+
+    function fadeTo(el, toVol, ms) {
+      return new Promise((resolve) => {
+        if (!el) return resolve();
+        const from = el.volume;
+        const t0 = performance.now();
+        const step = (now) => {
+          const t = Math.min(1, (now - t0) / ms);
+          el.volume = from + (toVol - from) * t;
+          if (t < 1) requestAnimationFrame(step);
+          else resolve();
+        };
+        requestAnimationFrame(step);
+      });
+    }
+
+    async function playRegion(idx) {
+      if (!audioEnabled) {
+        activeIdx = idx;
+        return;
+      }
+      preloadAround(idx);
+      if (idx === activeIdx) {
+        const cur = getAudio(idx);
+        if (cur && cur.paused) {
+          try { await cur.play(); } catch (_) {}
+        }
+        return;
+      }
+      const token = ++fadeToken;
+      const prev = activeIdx >= 0 ? getAudio(activeIdx) : null;
+      const next = getAudio(idx);
+      activeIdx = idx;
+      if (next) {
+        next.currentTime = next.currentTime || 0;
+        next.volume = 0;
+        try { await next.play(); } catch (_) { return; }
+      }
+      if (token !== fadeToken) return;
+      await Promise.all([
+        fadeTo(prev, 0, FADE_MS),
+        fadeTo(next, TARGET_VOL, FADE_MS),
+      ]);
+      if (token !== fadeToken) return;
+      if (prev && prev !== next) prev.pause();
+    }
 
     function setRegion(idx) {
       current = Math.max(0, Math.min(idx, layers.length - 1));
       layers.forEach((el, i) => el.classList.toggle("active", i === current));
       navLinks.forEach((el) => el.classList.toggle("active", Number(el.dataset.nav) === current));
+      playRegion(current);
+    }
+
+    if (audioToggle) {
+      audioToggle.addEventListener("click", async () => {
+        audioEnabled = !audioEnabled;
+        audioToggle.setAttribute("aria-pressed", audioEnabled ? "true" : "false");
+        audioToggle.title = audioEnabled ? "环境音开启（点击关闭）" : "环境音（点击开启）";
+        if (audioEnabled) {
+          await playRegion(current);
+        } else {
+          fadeToken++;
+          for (const el of audioCache.values()) {
+            el.pause();
+            el.volume = 0;
+          }
+          activeIdx = -1;
+        }
+      });
     }
 
     function updateProgress() {
