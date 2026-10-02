@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>摩奇大陆 · 气候长廊</title>
-  <meta name="description" content="从暖潮珊瑚湾到永夜冰原——摩奇大陆虚构世界沉浸式导览" />
+  <meta name="description" content="从暖潮珊瑚湾到永夜冰原——摩奇大陆十四境沉浸式导览" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@500;700&family=Noto+Sans+SC:wght@400;500;600&display=swap" rel="stylesheet" />
@@ -54,8 +54,9 @@
       background-position: center;
       opacity: 0;
       transform: scale(1.06);
-      transition: opacity 0.9s ease, transform 4s ease;
-      filter: saturate(1.05) contrast(1.05);
+      transition: opacity 0.85s ease, transform 5s ease;
+      filter: saturate(1.08) contrast(1.05);
+      will-change: opacity, transform;
     }
     .bg-layer.active {
       opacity: 1;
@@ -73,28 +74,34 @@
     .rail {
       position: fixed;
       top: 50%;
-      right: 22px;
+      right: 18px;
       transform: translateY(-50%);
       z-index: 40;
       display: flex;
       flex-direction: column;
-      gap: 14px;
+      gap: 9px;
       align-items: flex-end;
+      max-height: 88vh;
+      overflow-y: auto;
+      overflow-x: visible;
+      padding: 8px 4px;
+      scrollbar-width: none;
     }
+    .rail::-webkit-scrollbar { display: none; }
     .rail a {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
       text-decoration: none;
       color: var(--muted);
-      font-size: 0.78rem;
+      font-size: 0.72rem;
       letter-spacing: 0.04em;
     }
     .rail .dot {
-      width: 10px;
-      height: 10px;
+      width: 8px;
+      height: 8px;
       border-radius: 50%;
-      border: 2px solid rgba(255,255,255,0.45);
+      border: 2px solid rgba(255,255,255,0.4);
       background: transparent;
       transition: all 0.25s ease;
       flex-shrink: 0;
@@ -104,17 +111,19 @@
       background: var(--accent);
       border-color: var(--accent);
       box-shadow: 0 0 12px var(--glow);
+      transform: scale(1.15);
     }
     .rail a.active { color: var(--ink); }
     .rail .label {
       opacity: 0;
       transform: translateX(8px);
       transition: all 0.25s ease;
-      background: rgba(0,0,0,0.45);
-      padding: 4px 10px;
+      background: rgba(0,0,0,0.5);
+      padding: 3px 9px;
       border-radius: 999px;
       backdrop-filter: blur(8px);
       white-space: nowrap;
+      pointer-events: none;
     }
     .rail a:hover .label,
     .rail a.active .label {
@@ -164,7 +173,7 @@
     .hero .lede {
       font-size: 1.18rem;
       color: var(--muted);
-      max-width: 34em;
+      max-width: 36em;
       margin: 0 0 36px;
     }
     .hint {
@@ -280,14 +289,19 @@
     }
     footer a { color: var(--accent); text-decoration: none; }
     footer a:hover { text-decoration: underline; }
-    footer ul { margin: 10px 0 0; padding-left: 1.1em; }
+    footer ul { margin: 10px 0 0; padding-left: 1.1em; columns: 1; }
+    @media (min-width: 640px) {
+      footer ul { columns: 2; column-gap: 24px; }
+    }
 
     @media (max-width: 860px) {
       .story { margin: 0 auto; padding: 0 18px 100px; }
-      .rail { right: 10px; }
+      .rail { right: 8px; gap: 7px; }
       .rail .label { display: none; }
+      .rail .dot { width: 7px; height: 7px; }
       .card { padding: 30px 24px; border-radius: 22px; }
       footer { margin: 0 18px 28px; }
+      footer ul { columns: 1; }
     }
   </style>
 </head>
@@ -296,23 +310,37 @@
 
   <div class="bg-stack" aria-hidden="true">
     <div class="bg-layer active" data-bg="0" style="background-image:url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1800&q=80')"></div>
-    <div class="bg-layer" data-bg="1" style="background-image:url('https://images.unsplash.com/photo-1518509562904-e7ef99cdcc86?auto=format&fit=crop&w=1800&q=80')"></div>
-    <div class="bg-layer" data-bg="2" style="background-image:url('https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&fit=crop&w=1800&q=80')"></div>
-    <div class="bg-layer" data-bg="3" style="background-image:url('https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=1800&q=80')"></div>
-    <div class="bg-layer" data-bg="4" style="background-image:url('https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1800&q=80')"></div>
-    <div class="bg-layer" data-bg="5" style="background-image:url('https://images.unsplash.com/photo-1565073182887-6bcefbe225b1?auto=format&fit=crop&w=1800&q=80')"></div>
-    <div class="bg-layer" data-bg="6" style="background-image:url('https://images.unsplash.com/photo-1491002052546-bf38f186af56?auto=format&fit=crop&w=1800&q=80')"></div>
+    <div class="bg-layer" data-bg="1" style="background-image:url('https://images.unsplash.com/photo-1559827260-dc66d52bef19?auto=format&fit=crop&w=1800&q=80')"></div>
+    <div class="bg-layer" data-bg="2" style="background-image:url('https://images.unsplash.com/photo-1518509562904-e7ef99cdcc86?auto=format&fit=crop&w=1800&q=80')"></div>
+    <div class="bg-layer" data-bg="3" style="background-image:url('https://images.unsplash.com/photo-1505118380757-91f5f5632de0?auto=format&fit=crop&w=1800&q=80')"></div>
+    <div class="bg-layer" data-bg="4" style="background-image:url('https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&fit=crop&w=1800&q=80')"></div>
+    <div class="bg-layer" data-bg="5" style="background-image:url('https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=1800&q=80')"></div>
+    <div class="bg-layer" data-bg="6" style="background-image:url('https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=1800&q=80')"></div>
+    <div class="bg-layer" data-bg="7" style="background-image:url('https://images.unsplash.com/photo-1605649487212-47bdab064df7?auto=format&fit=crop&w=1800&q=80')"></div>
+    <div class="bg-layer" data-bg="8" style="background-image:url('https://images.unsplash.com/photo-1611273426858-450d8e3c9fce?auto=format&fit=crop&w=1800&q=80')"></div>
+    <div class="bg-layer" data-bg="9" style="background-image:url('https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1800&q=80')"></div>
+    <div class="bg-layer" data-bg="10" style="background-image:url('https://images.unsplash.com/photo-1506905925346-21bda4d32df4?auto=format&fit=crop&w=1800&q=80')"></div>
+    <div class="bg-layer" data-bg="11" style="background-image:url('https://images.unsplash.com/photo-1547036967-23d11aacaee0?auto=format&fit=crop&w=1800&q=80')"></div>
+    <div class="bg-layer" data-bg="12" style="background-image:url('https://images.unsplash.com/photo-1531366936337-7c912a4589a7?auto=format&fit=crop&w=1800&q=80')"></div>
+    <div class="bg-layer" data-bg="13" style="background-image:url('https://images.unsplash.com/photo-1491002052546-bf38f186af56?auto=format&fit=crop&w=1800&q=80')"></div>
     <div class="bg-veil"></div>
   </div>
 
   <nav class="rail" aria-label="地区导航">
     <a href="#r0" data-nav="0" class="active"><span class="label">暖潮珊瑚湾</span><span class="dot"></span></a>
-    <a href="#r1" data-nav="1"><span class="label">红树潮汐湾</span><span class="dot"></span></a>
-    <a href="#r2" data-nav="2"><span class="label">啼雨翡翠林</span><span class="dot"></span></a>
-    <a href="#r3" data-nav="3"><span class="label">金穗风原</span><span class="dot"></span></a>
-    <a href="#r4" data-nav="4"><span class="label">断云脊脉</span><span class="dot"></span></a>
-    <a href="#r5" data-nav="5"><span class="label">霜晶苔原</span><span class="dot"></span></a>
-    <a href="#r6" data-nav="6"><span class="label">永夜冰原</span><span class="dot"></span></a>
+    <a href="#r1" data-nav="1"><span class="label">星环环礁</span><span class="dot"></span></a>
+    <a href="#r2" data-nav="2"><span class="label">红树潮汐湾</span><span class="dot"></span></a>
+    <a href="#r3" data-nav="3"><span class="label">荧潮夜岸</span><span class="dot"></span></a>
+    <a href="#r4" data-nav="4"><span class="label">啼雨翡翠林</span><span class="dot"></span></a>
+    <a href="#r5" data-nav="5"><span class="label">雾吞裂谷</span><span class="dot"></span></a>
+    <a href="#r6" data-nav="6"><span class="label">金穗风原</span><span class="dot"></span></a>
+    <a href="#r7" data-nav="7"><span class="label">镜盐白泽</span><span class="dot"></span></a>
+    <a href="#r8" data-nav="8"><span class="label">黑曜熔漠</span><span class="dot"></span></a>
+    <a href="#r9" data-nav="9"><span class="label">断云脊脉</span><span class="dot"></span></a>
+    <a href="#r10" data-nav="10"><span class="label">浮梦群屿</span><span class="dot"></span></a>
+    <a href="#r11" data-nav="11"><span class="label">晶泪洞府</span><span class="dot"></span></a>
+    <a href="#r12" data-nav="12"><span class="label">极光冻原</span><span class="dot"></span></a>
+    <a href="#r13" data-nav="13"><span class="label">永夜冰原</span><span class="dot"></span></a>
   </nav>
 
   <main class="story">
@@ -320,8 +348,8 @@
       <div class="eyebrow">摩奇大陆 · 虚构世界导览</div>
       <h1>从暖潮到永夜</h1>
       <p class="lede">
-        沿着一条看不见的气候经线，南境海风吹开珊瑚湾，北境极光落进冰原。
-        向下滚动，走进七个彼此相连却气质迥异的地区——这是摩奇酒馆墙上那幅旧地图的当代译本。
+        沿着一条看不见的气候经线，南境海风吹开珊瑚与环礁，腹地藏着雾谷与盐泽，奇境里浮岛悬空、晶洞低语，北境极光落进冻原与冰原。
+        向下滚动，走进十四个彼此相连却气质迥异的地区——这是摩奇酒馆墙上那幅旧地图的当代译本。
       </p>
       <div class="hint">↓ 向下启程</div>
     </header>
@@ -343,6 +371,21 @@
 
     <section class="region" id="r1" data-region="1">
       <article class="card">
+        <span class="badge">南境 · 外海</span>
+        <h2>星环环礁</h2>
+        <p class="subtitle">Xinghuan Atoll Ring</p>
+        <p>从高处望去，一座座环礁像散落的星盘，圈住一汪比天空更蓝的静水。航图上它们排成淡淡的弧，水手称之为「海上的省略号」——表示故事还没讲完。</p>
+        <p>退潮时，白沙露出星形的纹路；潮回时，纹路被抹平，只剩风记得谁曾赤脚走过。</p>
+        <div class="meta">
+          <span class="chip">珊瑚环礁</span>
+          <span class="chip">潟湖 · 白沙</span>
+          <span class="chip">特产：环礁果冻糖</span>
+        </div>
+      </article>
+    </section>
+
+    <section class="region" id="r2" data-region="2">
+      <article class="card">
         <span class="badge">南境 · 河口</span>
         <h2>红树潮汐湾</h2>
         <p class="subtitle">Hongshu Tide Basin</p>
@@ -356,7 +399,22 @@
       </article>
     </section>
 
-    <section class="region" id="r2" data-region="2">
+    <section class="region" id="r3" data-region="3">
+      <article class="card">
+        <span class="badge">南境 · 夜岸</span>
+        <h2>荧潮夜岸</h2>
+        <p class="subtitle">Yingchao Glowshore</p>
+        <p>入夜后，浪尖会亮起来——不是灯火，是海水自己在呼吸。每一步脚印都拖出一串蓝绿色的星屑，孩子们打赌谁能把光带到更远的干沙上。</p>
+        <p>老渔人说：别用瓶子装走荧潮。光离开这片岸，就会害羞地灭掉；留在心里，却能照一整夜的路。</p>
+        <div class="meta">
+          <span class="chip">生物荧光</span>
+          <span class="chip">夜潮 · 蓝绿星屑</span>
+          <span class="chip">特产：荧砂夜灯</span>
+        </div>
+      </article>
+    </section>
+
+    <section class="region" id="r4" data-region="4">
       <article class="card">
         <span class="badge">腹地 · 雨林</span>
         <h2>啼雨翡翠林</h2>
@@ -371,7 +429,22 @@
       </article>
     </section>
 
-    <section class="region" id="r3" data-region="3">
+    <section class="region" id="r5" data-region="5">
+      <article class="card">
+        <span class="badge">腹地 · 峡谷</span>
+        <h2>雾吞裂谷</h2>
+        <p class="subtitle">Wutun Mistcleft</p>
+        <p>峡谷深得能把一整片云装进去。雾不是路过，是常住户——它们沿着岩壁爬升、翻滚，把远处的桥和近处的人一起吞成剪影。</p>
+        <p>本地谚语：「看清路之前，先听清回声。」回声会告诉你，下一道弯是悬崖，还是忽然敞开的晴空。</p>
+        <div class="meta">
+          <span class="chip">迷雾峡谷</span>
+          <span class="chip">回声 · 栈道</span>
+          <span class="chip">特产：雾涎清酒</span>
+        </div>
+      </article>
+    </section>
+
+    <section class="region" id="r6" data-region="6">
       <article class="card">
         <span class="badge">中境 · 平原</span>
         <h2>金穗风原</h2>
@@ -386,7 +459,37 @@
       </article>
     </section>
 
-    <section class="region" id="r4" data-region="4">
+    <section class="region" id="r7" data-region="7">
+      <article class="card">
+        <span class="badge">中境 · 盐泽</span>
+        <h2>镜盐白泽</h2>
+        <p class="subtitle">Jingyan Saltmirror</p>
+        <p>雨后，整片盐原变成一面躺平的天空。走路的人会怀疑自己究竟踩在地上，还是踩在倒置的云上。盐壳在阳光下细碎作响，像远方有人在撕开雪白的信纸。</p>
+        <p>商队在此立碑：「别追逐倒影里的自己——它比你更先到达地平线。」</p>
+        <div class="meta">
+          <span class="chip">盐湖 · 镜面</span>
+          <span class="chip">白昼幻景</span>
+          <span class="chip">特产：镜盐薄脆</span>
+        </div>
+      </article>
+    </section>
+
+    <section class="region" id="r8" data-region="8">
+      <article class="card">
+        <span class="badge">中境 · 火漠</span>
+        <h2>黑曜熔漠</h2>
+        <p class="subtitle">Heiyao Glasswaste</p>
+        <p>火山停息之后，大地留下一大片凝固的夜——黑曜与玄武像碎掉的星空铺开。烈日下，玻璃质地表会闪出冷光；夜里，余温从裂缝里慢慢呼吸。</p>
+        <p>旅人裹紧披风：这里不缺风景，缺的是「敢赤脚走三步」的勇气。据说最锋利的刀，是从此地拾起的一抹熔玻璃。</p>
+        <div class="meta">
+          <span class="chip">火山玻璃</span>
+          <span class="chip">黑沙 · 裂隙热</span>
+          <span class="chip">特产：曜石挂坠</span>
+        </div>
+      </article>
+    </section>
+
+    <section class="region" id="r9" data-region="9">
       <article class="card">
         <span class="badge">中北 · 山脉</span>
         <h2>断云脊脉</h2>
@@ -401,22 +504,52 @@
       </article>
     </section>
 
-    <section class="region" id="r5" data-region="5">
+    <section class="region" id="r10" data-region="10">
       <article class="card">
-        <span class="badge">北境 · 苔原</span>
-        <h2>霜晶苔原</h2>
-        <p class="subtitle">Shuangjing Tundra</p>
-        <p>草甸退成苔藓，颜色像压低了音量的水彩。风更干净，也更固执。远处的冰峰时隐时现，像尚未写完的句号。旅人在此学会慢下来：连呼吸都要节省温度。</p>
-        <p>夜里若看见极光刷过天际，老人会说：「那是北方在给南方回信。」</p>
+        <span class="badge">奇境 · 悬空</span>
+        <h2>浮梦群屿</h2>
+        <p class="subtitle">Fumeng Skylisles</p>
+        <p>云海之上，有几座岛像被风轻轻托住。桥是雾做的，路是光做的；站在崖边，能看见下方的世界缩成一枚会呼吸的印章。</p>
+        <p>岛民很少下界。他们寄信的方式是放下一根系着铃铛的长绳——若铃声清脆，说明收信人还愿意做梦。</p>
         <div class="meta">
-          <span class="chip">苔原 · 寒风</span>
-          <span class="chip">远峰 · 极光前奏</span>
+          <span class="chip">浮空群岛</span>
+          <span class="chip">云桥 · 铃信</span>
+          <span class="chip">特产：云絮软糖</span>
+        </div>
+      </article>
+    </section>
+
+    <section class="region" id="r11" data-region="11">
+      <article class="card">
+        <span class="badge">奇境 · 地底</span>
+        <h2>晶泪洞府</h2>
+        <p class="subtitle">Jinglei Crystalvault</p>
+        <p>洞顶垂下千万根冰晶与矿晶，像尚未落下的眼泪。火把靠近时，墙壁会把光折成蓝与紫的河流，脚步声也变得又细又长。</p>
+        <p>采晶人守一条规矩：只取自然脱落的碎片。他们说，硬敲下来的晶石会在夜里轻轻哭泣，吵得整座洞睡不着。</p>
+        <div class="meta">
+          <span class="chip">水晶洞窟</span>
+          <span class="chip">折光 · 静响</span>
+          <span class="chip">特产：泪晶糖</span>
+        </div>
+      </article>
+    </section>
+
+    <section class="region" id="r12" data-region="12">
+      <article class="card">
+        <span class="badge">北境 · 冻原</span>
+        <h2>极光冻原</h2>
+        <p class="subtitle">Jiguang Aurorasteppe</p>
+        <p>草甸退成苔藓，颜色像压低了音量的水彩。夜里，天幕被绿与紫的丝绸反复折叠，像北方在给南方写一封没有收件人的长信。</p>
+        <p>旅人在此学会慢下来：连呼吸都要节省温度。老人会说——极光刷过时，把心里想说的话悄悄念出来，风会替你送到该到的地方。</p>
+        <div class="meta">
+          <span class="chip">苔原 · 极光</span>
+          <span class="chip">寒风 · 夜幕</span>
           <span class="chip">特产：霜莓果酱</span>
         </div>
       </article>
     </section>
 
-    <section class="region" id="r6" data-region="6">
+    <section class="region" id="r13" data-region="13">
       <article class="card">
         <span class="badge">极境 · 冰原</span>
         <h2>永夜冰原</h2>
@@ -431,25 +564,32 @@
       </article>
     </section>
 
-    <section class="epilogue" data-region="6">
+    <section class="epilogue" data-region="13">
       <article class="card">
         <span class="badge">尾声</span>
         <h2>地图合上之后</h2>
-        <p>七个地区并非彼此隔绝：潮汐把盐带进红树，雨把雨林的绿洗进平原，风把麦香送上山脊，霜把山影画进苔原，而冰原记得一切——包括你曾在南境喝过的那口暖潮。</p>
+        <p>十四境并非彼此隔绝：潮汐把盐带进红树，荧潮把夜色借给岸线，雨把翡翠洗进平原，雾把裂谷藏进回声，风把麦香送上山脊，盐泽映出天空，熔漠记住火的形状，浮岛把梦吊在云上，晶洞把光折成河流，极光给冻原回信，而冰原记得一切——包括你曾在南境喝过的那口暖潮。</p>
         <blockquote>「世界很大，但热奶茶总能找到同温的双手。」</blockquote>
       </article>
     </section>
   </main>
 
   <footer>
-    <p><strong>摩奇大陆 · 气候长廊</strong> — 静态单页虚构世界导览。图片来自 Unsplash（免费许可），仅用于展示。</p>
+    <p><strong>摩奇大陆 · 气候长廊</strong> — 静态单页虚构世界导览（十四境）。图片来自 Unsplash（免费许可），仅用于展示。</p>
     <ul>
       <li>暖潮珊瑚湾 — <a href="https://unsplash.com/photos/1507525428034-b723cf961d3e" target="_blank" rel="noopener">Sean Oulashin</a></li>
-      <li>红树潮汐湾 — <a href="https://unsplash.com/photos/1518509562904-e7ef99cdcc86" target="_blank" rel="noopener">Underwater photography (Unsplash)</a></li>
+      <li>星环环礁 — <a href="https://unsplash.com/photos/1559827260-dc66d52bef19" target="_blank" rel="noopener">Unsplash</a></li>
+      <li>红树潮汐湾 — <a href="https://unsplash.com/photos/1518509562904-e7ef99cdcc86" target="_blank" rel="noopener">Unsplash</a></li>
+      <li>荧潮夜岸 — <a href="https://unsplash.com/photos/1505118380757-91f5f5632de0" target="_blank" rel="noopener">Silas Baisch</a></li>
       <li>啼雨翡翠林 — <a href="https://unsplash.com/photos/1448375240586-882707db888b" target="_blank" rel="noopener">Sebastian Unrau</a></li>
+      <li>雾吞裂谷 — <a href="https://unsplash.com/photos/1470071459604-3b5ec3a7fe05" target="_blank" rel="noopener">Unsplash</a></li>
       <li>金穗风原 — <a href="https://unsplash.com/photos/1500382017468-9049fed747ef" target="_blank" rel="noopener">Henrique Felix</a></li>
+      <li>镜盐白泽 — <a href="https://unsplash.com/photos/1605649487212-47bdab064df7" target="_blank" rel="noopener">Unsplash</a></li>
+      <li>黑曜熔漠 — <a href="https://unsplash.com/photos/1611273426858-450d8e3c9fce" target="_blank" rel="noopener">Unsplash</a></li>
       <li>断云脊脉 — <a href="https://unsplash.com/photos/1464822759023-fed622ff2c3b" target="_blank" rel="noopener">Kalen Emsley</a></li>
-      <li>霜晶苔原 — <a href="https://unsplash.com/photos/1565073182887-6bcefbe225b1" target="_blank" rel="noopener">Hans-Jurgen Mager</a></li>
+      <li>浮梦群屿 — <a href="https://unsplash.com/photos/1506905925346-21bda4d32df4" target="_blank" rel="noopener">Samuel Ferrara</a></li>
+      <li>晶泪洞府 — <a href="https://unsplash.com/photos/1547036967-23d11aacaee0" target="_blank" rel="noopener">Unsplash</a></li>
+      <li>极光冻原 — <a href="https://unsplash.com/photos/1531366936337-7c912a4589a7" target="_blank" rel="noopener">Jonatan Pie</a></li>
       <li>永夜冰原 — <a href="https://unsplash.com/photos/1491002052546-bf38f186af56" target="_blank" rel="noopener">Adam Chang</a></li>
     </ul>
     <p style="margin-top:12px;">许可：<a href="https://unsplash.com/license" target="_blank" rel="noopener">Unsplash License</a> · 仓库：unclefeng-git/mochitravern-site</p>
@@ -460,12 +600,10 @@
     const layers = [...document.querySelectorAll(".bg-layer")];
     const navLinks = [...document.querySelectorAll(".rail a")];
     const regions = [...document.querySelectorAll("[data-region]")];
+    const regionSections = [...document.querySelectorAll(".region")];
     let current = 0;
 
     function setRegion(idx) {
-      if (idx === current && layers[idx]?.classList.contains("active")) {
-        // still refresh nav/cards
-      }
       current = Math.max(0, Math.min(idx, layers.length - 1));
       layers.forEach((el, i) => el.classList.toggle("active", i === current));
       navLinks.forEach((el) => el.classList.toggle("active", Number(el.dataset.nav) === current));
@@ -477,25 +615,47 @@
       progress.style.width = Math.min(pct, 100) + "%";
     }
 
+    // Prefer the section closest to viewport center among intersecting ones
+    const visible = new Map();
+
     const io = new IntersectionObserver((entries) => {
       entries.forEach((entry) => {
-        if (!entry.isIntersecting) return;
         const idx = Number(entry.target.dataset.region);
-        if (!Number.isNaN(idx)) setRegion(idx);
-        if (entry.target.classList.contains("region")) {
-          entry.target.classList.add("in-view");
+        if (Number.isNaN(idx)) return;
+        if (entry.isIntersecting) {
+          visible.set(entry.target, entry.intersectionRatio);
+          if (entry.target.classList.contains("region")) {
+            entry.target.classList.add("in-view");
+          }
+        } else {
+          visible.delete(entry.target);
         }
       });
-    }, { threshold: 0.45, rootMargin: "-10% 0px -25% 0px" });
+
+      if (visible.size === 0) return;
+      let best = null;
+      let bestScore = -1;
+      const mid = window.innerHeight * 0.42;
+      visible.forEach((_ratio, el) => {
+        const r = el.getBoundingClientRect();
+        const center = (r.top + r.bottom) / 2;
+        const score = 1 / (1 + Math.abs(center - mid));
+        if (score > bestScore) {
+          bestScore = score;
+          best = el;
+        }
+      });
+      if (best) setRegion(Number(best.dataset.region));
+    }, { threshold: [0.2, 0.35, 0.5, 0.65], rootMargin: "-8% 0px -18% 0px" });
 
     regions.forEach((el) => io.observe(el));
-    document.querySelectorAll(".region").forEach((el) => {
-      // ensure first visible cards animate in
+    regionSections.forEach((el) => {
       const r = el.getBoundingClientRect();
       if (r.top < window.innerHeight * 0.75) el.classList.add("in-view");
     });
 
     window.addEventListener("scroll", updateProgress, { passive: true });
+    window.addEventListener("resize", updateProgress, { passive: true });
     updateProgress();
     setRegion(0);
   </script>
